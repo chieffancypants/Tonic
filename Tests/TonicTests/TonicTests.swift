@@ -37,4 +37,16 @@ final class TonicTests: XCTestCase {
         let range = (Pitch(60) ... Pitch(64))
         XCTAssertEqual(range.lowerBound, Pitch(60))
     }
+
+    func testPitchOverflow() {
+        let highPitch = Pitch(127)
+        let lowPitch = Pitch(0)
+
+        let shiftedUp = highPitch.advanced(by: 1)
+        XCTAssertEqual(shiftedUp.midiNoteNumber, 127)
+
+        let shiftedDown = lowPitch.advanced(by: -1)
+        XCTAssertEqual(shiftedDown.midiNoteNumber, 0)
+    }
+
 }

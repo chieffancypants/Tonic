@@ -162,4 +162,42 @@ final class NoteTests: XCTestCase {
         let empty = NoteSet()
         XCTAssertNil(empty.first)
     }
+
+    func testNoteOverflow() {
+        // MIDI #127 = G8
+        let highestNote = Note(.G, octave: 8)
+        XCTAssertEqual(highestNote.noteNumber, 127)
+
+        // the next note should be out of bounds
+        XCTAssertEqual(Note(.A, octave:8).noteNumber, 117)
+        XCTAssertEqual(Note(.A, octave:9).noteNumber, 117)
+
+        // the lowest note is C-2
+        let lowestNote = Note(.C, octave: -2)
+        XCTAssertEqual(Note(.C, octave: -3).noteNumber, 0)
+
+        // the previous note should be out of bounds
+        XCTAssertEqual(Note(.B, octave: -3).noteNumber, 11)
+        XCTAssertEqual(Note(.B, octave: -4).noteNumber, 11)
+
+        // attempt to overflow with sharps should roll back an octave
+        XCTAssertEqual(Note(.G, accidental: .sharp, octave: 8).noteNumber, 116)
+        XCTAssertEqual(Note(.G, accidental: .doubleSharp, octave: 8).noteNumber, 117)
+
+        // attempt to underflow with flats should roll forward an octave
+        XCTAssertEqual(Note(.C, accidental: .flat, octave: -2).noteNumber, 11)
+        XCTAssertEqual(Note(.C, accidental: .doubleFlat, octave: -2).noteNumber, 10)
+
+        // test shiftUp
+        XCTAssertEqual(highestNote.shiftUp(.A1)?.noteNumber, nil)
+        XCTAssertEqual(highestNote.shiftUp(.P8)?.noteNumber, nil)
+
+        // test shiftDown
+        XCTAssertEqual(lowestNote.shiftDown(.P8)?.noteNumber, nil)
+        XCTAssertEqual(lowestNote.shiftDown(.M7)?.noteNumber, nil)
+        XCTAssertEqual(Note(.C, octave: -1).shiftDown(.M7)?.noteNumber, 1)
+        XCTAssertEqual(Note(.G, octave: -2).shiftDown(.P5)?.noteNumber, 0)
+        XCTAssertEqual(Note(.G, octave: -2).shiftDown(.m6)?.noteNumber, nil)
+        XCTAssertEqual(lowestNote.shiftDown(.A1)?.noteNumber, nil)
+    }
 }

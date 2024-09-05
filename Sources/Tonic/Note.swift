@@ -4,7 +4,7 @@ import Foundation
 
 /// A pitch with a particular spelling.
 public struct Note: Equatable, Hashable, Codable {
-    
+
     /// Base name for the note
     public var noteClass: NoteClass = .init(.C, accidental: .natural)
 
@@ -30,10 +30,15 @@ public struct Note: Equatable, Hashable, Codable {
     ///   - octave: Which octave the note appears in
     public init(_ letter: Letter = .C, accidental: Accidental = .natural, octave: Int = Note.MiddleCStandard.yamaha.middleCNumber) {
         noteClass = NoteClass(letter, accidental: accidental)
-        self.octave = octave
+        let octavesStartAt = middleCStandard.middleCNumber - (60 / 12)  // 60 (middle C) is the 5th octave - middleCNumber
+        let noteValue = Int(noteClass.letter.baseNote) + Int(noteClass.accidental.rawValue)
+        let maxOctave = (127 - noteValue) / 12 - middleCStandard.middleCNumber + 1
+
+        // clamp to the valid range
+        self.octave = max(min(octave, maxOctave), octavesStartAt)
     }
 
-    /// Initaliize the note from a pitch, given the key
+    /// Initialize the note from a pitch, given the key
     ///
     /// Tonic will find best note matching the pitch in the given key.
     /// - Parameters:
@@ -77,7 +82,7 @@ public struct Note: Equatable, Hashable, Codable {
     }
 
     /// Initialize from raw value
-    /// - Parameter index: integer represetnation
+    /// - Parameter index: integer representation
     public init(index: Int) {
         octave = (index / 35) + middleCStandard.firstOctaveOffset
         let letter = Letter(rawValue: (index % 35) / 5)!
@@ -123,7 +128,9 @@ public struct Note: Equatable, Hashable, Codable {
     /// - Returns: New note the correct distance away
     public func shiftDown(_ shift: Interval) -> Note? {
         var newLetterIndex = (noteClass.letter.rawValue - (shift.degree - 1))
-        let newOctave = (Int(pitch.midiNoteNumber) - shift.semitones) / 12 + middleCStandard.firstOctaveOffset
+        let newNumber = Int(pitch.midiNoteNumber) - shift.semitones
+        if newNumber < 0 { return nil }
+        let newOctave = newNumber / 12 + middleCStandard.firstOctaveOffset
 
         while newLetterIndex < 0 {
             newLetterIndex += 7
@@ -146,6 +153,7 @@ public struct Note: Equatable, Hashable, Codable {
         let newLetterIndex = (noteClass.letter.rawValue + (shift.degree - 1))
         let newLetter = Letter(rawValue: newLetterIndex % Letter.allCases.count)!
         let newMidiNoteNumber = Int(pitch.midiNoteNumber) + shift.semitones
+        if newMidiNoteNumber > 127 { return nil }
 
         let newOctave = (newMidiNoteNumber / 12) + middleCStandard.firstOctaveOffset
         for accidental in Accidental.allCases {
@@ -181,13 +189,13 @@ extension Note: IntRepresentable {
 
         noteClass = NoteClass(letter, accidental: accidental)
     }
-    
+
     /// Global index of the note for use in a NoteSet
     public var intValue: Int {
         let accidentalCount = Accidental.allCases.count
         let letterCount = Letter.allCases.count
         let octaveCount = letterCount * accidentalCount
-        
+
         var index = noteClass.letter.rawValue * accidentalCount + (Int(noteClass.accidental.rawValue) + 2)
         if letter == .B {
             if accidental == .sharp { index = 0 }

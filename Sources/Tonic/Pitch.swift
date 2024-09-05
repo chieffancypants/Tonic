@@ -121,6 +121,7 @@ extension Pitch: Strideable {
     }
 
     public func advanced(by n: Int8) -> Pitch {
-        Pitch(midiNoteNumber + n)
+        let clamped = max(min(n, 127 - midiNoteNumber), -midiNoteNumber)
+        return Pitch(midiNoteNumber + clamped)
     }
 }
