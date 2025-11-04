@@ -26,12 +26,7 @@ public struct Note: Sendable, Equatable, Hashable, Codable {
     ///   - octave: Which octave the note appears in
     public init(_ letter: Letter = .C, accidental: Accidental = .natural, octave: Int = 3) {
         noteClass = NoteClass(letter, accidental: accidental)
-        let octavesStartAt = middleCStandard.middleCNumber - (60 / 12)  // 60 (middle C) is the 5th octave - middleCNumber
-        let noteValue = Int(noteClass.letter.baseNote) + Int(noteClass.accidental.rawValue)
-        let maxOctave = (127 - noteValue) / 12 - middleCStandard.middleCNumber + 1
-
-        // clamp to the valid range
-        self.octave = max(min(octave, maxOctave), octavesStartAt)
+        self.octave = octave
     }
 
     /// Initialize the note from a pitch, given the key
