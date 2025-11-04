@@ -223,7 +223,7 @@ public enum Interval: Int, Sendable, CaseIterable, Codable {
     }
 
     /// Number of letters the interval spans
-    var degree: Int {
+    public var degree: Int {
         switch self {
             case .P1: return 1
             case .A1: return 1
