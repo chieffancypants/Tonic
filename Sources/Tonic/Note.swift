@@ -80,33 +80,64 @@ public struct Note: Sendable, Equatable, Hashable, Codable {
         noteClass = NoteClass(letter, accidental: accidental)
     }
 
-    /// MIDI Note 0-127 starting at C
     public var noteNumber: Int8 {
-         if octave < -2 {
-             return 0
-         }
-         if octave > 8 {
-             return 127
-         }
-         let octaveBounds = ((octave + 2) * 12) ... ((octave + 3) * 12)
-         var note = Int(noteClass.letter.baseNote) + Int(noteClass.accidental.rawValue)
-         if noteClass.letter == .B && noteClass.accidental.rawValue > 0 {
-             note -= 12
-         }
-         if noteClass.letter == .C && noteClass.accidental.rawValue < 0 {
-             note += 12
-         }
-         while !octaveBounds.contains(note) {
-             note += 12
-         }
-         if note < 0 {
-             return 0
-         }
-         if note > 127 {
-             return 127
-         }
-         return Int8(note)
-     }
+        // clamp extreme octaves
+        if octave < -2 { return 0 }
+        if octave > 8 { return 127 }
+
+        let lower = (octave + 2) * 12
+        let upper = (octave + 3) * 12
+
+        var note = Int(noteClass.letter.baseNote) + Int(noteClass.accidental.rawValue)
+
+        if noteClass.letter == .B && noteClass.accidental.rawValue > 0 {
+            note -= 12
+        }
+        if noteClass.letter == .C && noteClass.accidental.rawValue < 0 {
+            note += 12
+        }
+
+        // Adjust into [lower, upper] using plain integer comparisons
+        while note < lower {
+            note += 12
+        }
+        while note > upper {
+            note -= 12
+        }
+
+        if note < 0 { return 0 }
+        if note > 127 { return 127 }
+        return Int8(note)
+    }
+
+
+    // /// MIDI Note 0-127 starting at C
+    // public var noteNumber: Int8 {
+    //      if octave < -2 {
+    //          return 0
+    //      }
+    //      if octave > 8 {
+    //          return 127
+    //      }
+    //      let octaveBounds = ((octave + 2) * 12) ... ((octave + 3) * 12)
+    //      var note = Int(noteClass.letter.baseNote) + Int(noteClass.accidental.rawValue)
+    //      if noteClass.letter == .B && noteClass.accidental.rawValue > 0 {
+    //          note -= 12
+    //      }
+    //      if noteClass.letter == .C && noteClass.accidental.rawValue < 0 {
+    //          note += 12
+    //      }
+    //      while !octaveBounds.contains(note) {
+    //          note += 12
+    //      }
+    //      if note < 0 {
+    //          return 0
+    //      }
+    //      if note > 127 {
+    //          return 127
+    //      }
+    //      return Int8(note)
+    //  }
 
     /// The pitch for the note
     public var pitch: Pitch {
@@ -177,8 +208,8 @@ extension Note: Comparable {
 
 extension Note: IntRepresentable {
     public init(intValue: Int) {
-        let accidentalCount = Accidental.allCases.count
-        let letterCount = Letter.allCases.count
+        let accidentalCount = Accidental.count
+        let letterCount = Letter.count
         let octaveCount = letterCount * accidentalCount
         octave = (intValue / octaveCount) - 2
         var letter = Letter(rawValue: (intValue % octaveCount) / accidentalCount)!

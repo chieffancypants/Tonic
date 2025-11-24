@@ -6,7 +6,8 @@ import Foundation
 ///
 /// A semitone offset applied to a note that does not change the letter of the note, just the pitch.
 public enum Accidental: Int8, Sendable, CaseIterable, Equatable, Hashable, Codable {
-    static var count: Int { Accidental.allCases.count }
+    // static var count: Int { Accidental.allCases.count }
+    static var count: Int = { Accidental.allCases.count }()
     static var naturalIndex: Int { count / 2 }
 
     /// A double flat represented as "𝄫" lowers the note by a whole tone, or two semitones.
@@ -30,7 +31,7 @@ extension Accidental: CustomStringConvertible {
     public var description: String {
         ["𝄫", "♭", "", "♯", "𝄪"][Int(rawValue) + Accidental.naturalIndex]
     }
-    
+
     /// Name of Accidental using specialized Chord Symbol Fonts Norfolk or Pori from
     /// NotationExpress: https://www.notationcentral.com/product/norfolk-fonts-for-sibelius/
     public var chordFontDescription: String {

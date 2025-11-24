@@ -9,8 +9,19 @@ import Foundation
 public enum Letter: Int, Sendable, CaseIterable, Equatable, Hashable, Codable {
     case C, D, E, F, G, A, B
 
+    // static var count: Int { Letter.allCases.count }
+    static var count: Int = { Letter.allCases.count }()
+
     var baseNote: UInt8 {
-        return [0, 2, 4, 5, 7, 9, 11][rawValue]
+        switch self {
+        case .C: return 0
+        case .D: return 2
+        case .E: return 4
+        case .F: return 5
+        case .G: return 7
+        case .A: return 9
+        case .B: return 11
+        }
     }
 }
 
