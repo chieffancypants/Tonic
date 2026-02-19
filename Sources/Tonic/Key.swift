@@ -15,6 +15,10 @@ public struct Key: Sendable, Equatable, Hashable {
     /// A note set containing all the notes in the key
     public let noteSet: NoteSet
 
+    /// An ordered array of all NoteClasses present in the key
+    // TODO: Remove noteSet above and switch to using this as it makes far more sense
+    public var noteClasses = [NoteClass]()
+
     /// Initialize the key
     /// - Parameters:
     ///   - root: The primary note class of the key, also known as the tonic
@@ -26,6 +30,7 @@ public struct Key: Sendable, Equatable, Hashable {
         var r: [Note] = []
         for interval in scale.intervals {
             if let noteClass = root.canonicalNote.shiftUp(interval)?.noteClass {
+                noteClasses.append(noteClass)
                 r.append(noteClass.canonicalNote)
             }
         }
