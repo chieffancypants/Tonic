@@ -653,5 +653,45 @@ class ChordTests: XCTestCase {
         assertRankedChord([65, 69, 72, 74, 79], expectedDescriptions: ["F6/9", "G9sus4/F", "G11sus2/F", "Dm7(add11)/F"])
         assertRankedChord([65, 69, 72, 76, 79], expectedDescriptions: ["Fmaj9", "Am7(add♭13)/F"])
     }
-    
+
+    // MARK: - Octave-Doubled Voicings
+    //
+    // A chord must be detected the same regardless of how many times its notes
+    // are doubled at other octaves — guitar voicings routinely repeat the root,
+    // third, and fifth across six strings. Detection currently breaks when
+    // *every* pitch class is doubled (e.g. a full six-string D/F♯): the chord
+    // search never matches a unison/octave of the root, so `foundNotes` falls
+    // one short of `pitchSet.count`. The "every note doubled" cases below
+    // document that bug and should pass once it is fixed.
+
+    func testDMajorDetectedInRootPosition() {
+        // D F♯ A
+        assertRankedChord([50, 54, 57], expectedDescriptions: ["D"])
+    }
+
+    func testDMajorOverFSharpDetectedWithDistinctNotes() {
+        // F♯ A D
+        assertRankedChord([42, 45, 50], expectedDescriptions: ["D/F♯"])
+    }
+
+    func testDMajorOverFSharpDetectedWhenFifthAndOctaveDoubled() {
+        // F♯ A D A D — A and D doubled; F♯ is still single so it can root the search
+        assertRankedChord([42, 45, 50, 57, 62], expectedDescriptions: ["D/F♯"])
+    }
+
+    func testDMajorOverFSharpDetectedWhenEveryNoteDoubled() {
+        // F♯ A D A D F♯ — full six-string voicing, every pitch class doubled
+        assertRankedChord([42, 45, 50, 57, 62, 66], expectedDescriptions: ["D/F♯"])
+    }
+
+    func testCMajorDetectedWhenRootAndThirdDoubled() {
+        // C E G C E — G is single so the search can root on G
+        assertRankedChord([60, 64, 67, 72, 76], expectedDescriptions: ["C"])
+    }
+
+    func testCMajorDetectedWhenEveryNoteDoubled() {
+        // C E G C E G — every pitch class doubled
+        assertRankedChord([60, 64, 67, 72, 76, 79], expectedDescriptions: ["C"])
+    }
+
 }

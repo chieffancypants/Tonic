@@ -221,6 +221,20 @@ extension Chord {
                 var usedNoteArrays: [[Note]] = [enharmonicNoteArray]
                 var foundNotes: [Note] = []
                 foundNotes.append(rootNote)
+
+                // The root's pitch class can appear at several octaves (guitar
+                // voicings routinely double the root). The interval search below
+                // never looks for a unison/octave, so consume those duplicates
+                // up front. Otherwise they're never matched and `foundNotes`
+                // can't reach `pitchSet.count`, which silently defeats detection
+                // whenever every pitch class in the voicing is doubled.
+                for noteArray in enharmonicNoteArrays where !usedNoteArrays.contains(noteArray) {
+                    if let duplicateRoot = noteArray.first(where: { $0.noteClass == rootNote.noteClass }) {
+                        foundNotes.append(duplicateRoot)
+                        usedNoteArrays.append(noteArray)
+                    }
+                }
+
                 for nextIntervals in chordSearchIntervalArray {
                     var foundNote = false
                     for nextInterval in nextIntervals {
