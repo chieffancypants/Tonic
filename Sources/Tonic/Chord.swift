@@ -94,7 +94,11 @@ public struct Chord: Sendable, Equatable, Hashable, Codable {
     /// - Returns: Roman Numeral notation
     public func romanNumeralNotation(in key: Key) -> String? {
         let capitalRomanNumerals = ["I", "II", "III", "IV", "V", "VI", "VII"]
-        if let index = key.primaryTriads.firstIndex(where: { $0 == self }) {
+        // Roman numeral analysis is diatonic (7 degrees). Non-diatonic scales
+        // (e.g. the 8-note whole/half-diminished) can yield more than 7 primary
+        // triads, so bounds-check before indexing to avoid an out-of-range trap.
+        if let index = key.primaryTriads.firstIndex(where: { $0 == self }),
+           index < capitalRomanNumerals.count {
             let romanNumeral = capitalRomanNumerals[index]
             switch type {
             case .major: return romanNumeral
