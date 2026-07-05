@@ -91,6 +91,50 @@ public struct Pitch: Sendable, Equatable, Hashable, Codable {
     public func existsNaturally(in key: Key) -> Bool {
         key.noteSet.array.map({ $0.noteClass }).contains(note(in: key).noteClass)
     }
+
+    /// Returns all possible enharmonic notes that could represent the pitch.
+    ///
+    /// The algorithm works from the finite accidental range instead of searching
+    /// through notes. For each allowed accidental, it subtracts that accidental's
+    /// semitone offset from this pitch to find the pitch class the natural letter
+    /// would need to have. If that pitch class is one of the natural notes
+    /// (`C`, `D`, `E`, `F`, `G`, `A`, or `B`), it creates that spelling and keeps
+    /// it only if the resulting note resolves back to this exact pitch.
+    ///
+    /// By default, only practical enharmonics using flats, naturals, and sharps
+    /// are returned. When `allowTheoretical` is `true`, the search includes double
+    /// flats and double sharps, but no more extreme accidentals.
+    ///
+    /// - Parameter allowTheoretical: Whether to include spellings with double flats
+    ///   and double sharps.
+    /// - Returns: All note spellings that resolve to this pitch, sorted by note value.
+    public func enharmonicNotes(allowTheoretical: Bool = false) -> [Note] {
+        let accidentalRange = allowTheoretical
+            ? Int(Accidental.doubleFlat.rawValue) ... Int(Accidental.doubleSharp.rawValue)
+            : Int(Accidental.flat.rawValue) ... Int(Accidental.sharp.rawValue)
+        let octave = Int(midiNoteNumber) / 12 + Note.MiddleCStandard.yamaha.firstOctaveOffset
+
+        return accidentalRange.compactMap { accidentalValue -> Note? in
+            guard let accidental = Accidental(rawValue: Int8(accidentalValue)) else { return nil }
+
+            let naturalPitchClass = ((Int(midiNoteNumber) - accidentalValue) % 12 + 12) % 12
+            let letter: Letter
+            switch naturalPitchClass {
+            case 0: letter = .C
+            case 2: letter = .D
+            case 4: letter = .E
+            case 5: letter = .F
+            case 7: letter = .G
+            case 9: letter = .A
+            case 11: letter = .B
+            default: return nil
+            }
+
+            let note = Note(letter, accidental: accidental, octave: octave)
+            return note.pitch == self ? note : nil
+        }
+        .sorted { $0.intValue < $1.intValue }
+    }
 }
 
 extension Pitch: IntRepresentable {

@@ -62,6 +62,22 @@ final class NoteTests: XCTestCase {
         XCTAssertEqual(cFlat.spelling(in: .Bb).description, "C♭")
     }
 
+    func testPitchEnharmonicNotes() {
+        XCTAssertEqual(Pitch(61).enharmonicNotes().map(\.description), ["C♯3", "D♭3"])
+        XCTAssertEqual(Pitch(61).enharmonicNotes(allowTheoretical: true).map(\.description), ["B𝄪3", "C♯3", "D♭3"])
+
+        XCTAssertEqual(Pitch(60).enharmonicNotes().map(\.description), ["B♯3", "C3"])
+        XCTAssertEqual(Pitch(60).enharmonicNotes(allowTheoretical: true).map(\.description), ["B♯3", "C3", "D𝄫3"])
+    }
+
+    func testPitchEnharmonicNotesAtMidiBoundaries() {
+        XCTAssertEqual(Pitch(0).enharmonicNotes().map(\.description), ["B♯-2", "C-2"])
+        XCTAssertEqual(Pitch(0).enharmonicNotes(allowTheoretical: true).map(\.description), ["B♯-2", "C-2", "D𝄫-2"])
+
+        XCTAssertEqual(Pitch(127).enharmonicNotes().map(\.description), ["G8"])
+        XCTAssertEqual(Pitch(127).enharmonicNotes(allowTheoretical: true).map(\.description), ["F𝄪8", "G8", "A𝄫8"])
+    }
+
     func testComparison() {
         XCTAssert(Note.C < Note.Cs)
     }
