@@ -94,7 +94,11 @@ public struct Chord: Sendable, Equatable, Hashable, Codable {
     /// - Returns: Roman Numeral notation
     public func romanNumeralNotation(in key: Key) -> String? {
         let capitalRomanNumerals = ["I", "II", "III", "IV", "V", "VI", "VII"]
-        if let index = key.primaryTriads.firstIndex(where: { $0 == self }) {
+        // Roman numeral analysis is diatonic (7 degrees). Non-diatonic scales
+        // (e.g. the 8-note whole/half-diminished) can yield more than 7 primary
+        // triads, so bounds-check before indexing to avoid an out-of-range trap.
+        if let index = key.primaryTriads.firstIndex(where: { $0 == self }),
+           index < capitalRomanNumerals.count {
             let romanNumeral = capitalRomanNumerals[index]
             switch type {
             case .major: return romanNumeral
@@ -221,6 +225,20 @@ extension Chord {
                 var usedNoteArrays: [[Note]] = [enharmonicNoteArray]
                 var foundNotes: [Note] = []
                 foundNotes.append(rootNote)
+
+                // The root's pitch class can appear at several octaves (guitar
+                // voicings routinely double the root). The interval search below
+                // never looks for a unison/octave, so consume those duplicates
+                // up front. Otherwise they're never matched and `foundNotes`
+                // can't reach `pitchSet.count`, which silently defeats detection
+                // whenever every pitch class in the voicing is doubled.
+                for noteArray in enharmonicNoteArrays where !usedNoteArrays.contains(noteArray) {
+                    if let duplicateRoot = noteArray.first(where: { $0.noteClass == rootNote.noteClass }) {
+                        foundNotes.append(duplicateRoot)
+                        usedNoteArrays.append(noteArray)
+                    }
+                }
+
                 for nextIntervals in chordSearchIntervalArray {
                     var foundNote = false
                     for nextInterval in nextIntervals {

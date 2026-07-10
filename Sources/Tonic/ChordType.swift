@@ -96,6 +96,9 @@ public enum ChordType: String, Sendable, CaseIterable, Codable {
     /// Major Add Nine: Major Third, Perfect Fifth, Major Ninth, e.g. `C(add9)`
     case maj_add9
 
+    /// Major Add Four: Major Third, Perfect Fifth, Perfect Eleventh, e.g. `C(add4)`
+    case maj_add4
+
     /// Minor Add Nine: Minor Third, Perfect Fifth, Major Ninth, e.g. `Cm(add9)`
     case min_add9
     
@@ -629,6 +632,8 @@ public enum ChordType: String, Sendable, CaseIterable, Codable {
                 return [.m3, .P5, .m7, .m9]
             case .maj_add9:
                 return [.M3, .P5, .M9]
+            case .maj_add4:
+                return [.M3, .P5, .P11]
             case .min_add9:
                 return [.m3, .P5, .M9]
             case .dim_add9:
@@ -946,6 +951,7 @@ extension ChordType: CustomStringConvertible {
             case .min9:                        return "m9"
             case .min_maj9:                    return "mMaj9"
             case .maj_add9:                    return "(add9)"
+            case .maj_add4:                    return "(add4)"
             case .min_add9:                    return "m(add9)"
             case .maj_6_9:                     return "6/9"
             case .maj9_flat5:                  return "maj9(♭5)"
@@ -1131,6 +1137,7 @@ extension ChordType: CustomStringConvertible {
             case .min9:                        return "m9"
             case .min_maj9:                    return "m^9"
             case .maj_add9:                    return "@9"
+            case .maj_add4:                    return "@4"
             case .min_add9:                    return "m@9"
             case .maj_6_9:                     return "%"
             case .maj9_flat5:                  return "^9b5"
