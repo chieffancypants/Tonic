@@ -85,6 +85,28 @@ public struct Key: Sendable, Equatable, Hashable {
     }
 }
 
+
+extension Key: Codable {
+    enum CodingKeys:CodingKey {
+        case root
+        case scale
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let root = try container.decode(NoteClass.self, forKey: .root)
+        let scale = try container.decode(Scale.self, forKey: .scale)
+        self.init(root: root, scale: scale)
+    }
+
+    public func encode(to encoder: any Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(root, forKey: .root)
+        try container.encode(scale, forKey: .scale)
+    }
+}
+
+
 extension RangeReplaceableCollection {
     func rotatingLeft(positions: Int) -> SubSequence {
         let index = self.index(startIndex, offsetBy: positions, limitedBy: endIndex) ?? endIndex
