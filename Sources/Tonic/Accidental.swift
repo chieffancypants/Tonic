@@ -6,7 +6,6 @@ import Foundation
 ///
 /// A semitone offset applied to a note that does not change the letter of the note, just the pitch.
 public enum Accidental: Int8, Sendable, CaseIterable, Equatable, Hashable, Codable {
-    // static var count: Int { Accidental.allCases.count }
     static var count: Int = { Accidental.allCases.count }()
     static var naturalIndex: Int { count / 2 }
 

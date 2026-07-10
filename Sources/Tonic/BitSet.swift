@@ -47,18 +47,6 @@ public struct BitSet64: BitSet, OptionSet {
         rawValue &= ~(1 << bit)
     }
 
-    // @inlinable
-    // @inline(__always)
-    // public func forEach(_ f: (Int) -> Void) {
-    //     if rawValue != 0 {
-    //         for bit in 0 ..< 64 {
-    //             if isSet(bit: bit) {
-    //                 f(bit)
-    //             }
-    //         }
-    //     }
-    // }
-
     @inlinable
     @inline(__always)
     public func forEach(_ f: (Int) -> Void) {

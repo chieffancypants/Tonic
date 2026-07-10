@@ -9,7 +9,6 @@ import Foundation
 public enum Letter: Int, Sendable, CaseIterable, Equatable, Hashable, Codable {
     case C, D, E, F, G, A, B
 
-    // static var count: Int { Letter.allCases.count }
     static var count: Int = { Letter.allCases.count }()
 
     var baseNote: UInt8 {

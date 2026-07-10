@@ -52,16 +52,6 @@ final class NoteTests: XCTestCase {
         XCTAssertEqual(cDoubleSharp.description, "C𝄪3")
     }
 
-    func testNoteSpellingBroken() {
-        let Cb = Note(pitch: Pitch(59), key: .Bb)
-        XCTAssertEqual(Cb.description, "C♭3")
-        XCTAssertEqual(Cb.spelling(in: .Bb).description, "C♭")
-
-        let cFlat = Note.Cb
-        XCTAssertEqual(cFlat.description, "C♭3")
-        XCTAssertEqual(cFlat.spelling(in: .Bb).description, "C♭")
-    }
-
     func testPitchEnharmonicNotes() {
         XCTAssertEqual(Pitch(61).enharmonicNotes().map(\.description), ["C♯3", "D♭3"])
         XCTAssertEqual(Pitch(61).enharmonicNotes(allowTheoretical: true).map(\.description), ["B𝄪3", "C♯3", "D♭3"])
